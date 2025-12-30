@@ -32,21 +32,3 @@ yarn-error.*
 
 # local env files
 .env*.local
-
-# typescript
-*.tsbuildinfo
-
-app-example
-
-# generated native folders
-/ios
-/android
-
-# secrets and credentials
-secrets/
-*.json
-!package.json
-!package-lock.json
-!tsconfig.json
-!app.json
-!google-services.json
