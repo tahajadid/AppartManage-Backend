@@ -1,0 +1,31 @@
+{
+  "name": "appartmanage-backend",
+  "version": "1.0.0",
+  "description": "nothing",
+  "homepage": "https://github.com/tahajadid/AppartManage-Backend#readme",
+  "bugs": {
+    "url": "https://github.com/tahajadid/AppartManage-Backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tahajadid/AppartManage-Backend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "echo \"No linter configured\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
