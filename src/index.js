@@ -11,7 +11,28 @@ app.use(
   cors(
     allowedOrigins.length
       ? {
-          origin: allowedOrigins,
+          origin: (origin, callback) => {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+            
+            // Check if origin matches any allowed origin
+            const isAllowed = allowedOrigins.some(allowed => {
+              // Support wildcard patterns like exp://192.168.*
+              if (allowed.includes('*')) {
+                const pattern = allowed.replace(/\*/g, '.*');
+                const regex = new RegExp(`^${pattern}$`);
+                return regex.test(origin);
+              }
+              return origin === allowed;
+            });
+            
+            if (isAllowed) {
+              callback(null, true);
+            } else {
+              callback(new Error('Not allowed by CORS'));
+            }
+          },
+          credentials: true,
         }
       : undefined
   )
@@ -25,7 +46,10 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
+const { environment } = require('./config/env');
+
 app.listen(PORT, () => {
-  console.log(`Notification backend running on port ${PORT}`);
+  console.log(`🚀 Notification backend running on port ${PORT}`);
+  console.log(`   Environment: ${environment.toUpperCase()}\n`);
 });
 
