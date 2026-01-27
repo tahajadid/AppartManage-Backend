@@ -15,8 +15,13 @@
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "NODE_ENV=production node src/index.js",
+    "start:dev": "NODE_ENV=development node src/index.js",
+    "start:preprod": "NODE_ENV=preproduction node src/index.js",
+    "start:prod": "NODE_ENV=production node src/index.js",
+    "dev": "NODE_ENV=development nodemon src/index.js",
+    "dev:preprod": "NODE_ENV=preproduction nodemon src/index.js",
+    "dev:prod": "NODE_ENV=production nodemon src/index.js",
     "lint": "echo \"No linter configured\""
   },
   "dependencies": {
