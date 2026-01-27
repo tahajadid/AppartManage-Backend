@@ -4,6 +4,7 @@ const cors = require('cors');
 const { PORT, allowedOrigins } = require('./config/env');
 const deviceRoutes = require('./routes/deviceRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const billRoutes = require('./routes/billRoutes');
 
 const app = express();
 app.use(express.json());
@@ -40,6 +41,7 @@ app.use(
 
 app.use('/api', deviceRoutes);
 app.use('/api', notificationRoutes);
+app.use('/api', billRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error', err);
