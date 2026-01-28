@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: appartmanage-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Note: Set these in Render dashboard Environment tab:
+      # - FIREBASE_SERVICE_ACCOUNT_JSON (paste entire JSON)
+      # - FIREBASE_PROJECT_ID (your Firebase project ID)
+      # - ALLOWED_ORIGINS (comma-separated list of allowed origins)
+

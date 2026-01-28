@@ -43,6 +43,11 @@ app.use('/api', deviceRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api', billRoutes);
 
+// Health check endpoint for deployment platforms
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error', err);
   res.status(500).json({ error: 'Internal server error' });
