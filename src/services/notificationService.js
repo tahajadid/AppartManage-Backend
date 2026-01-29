@@ -57,7 +57,7 @@ async function sendToToken(token, payload) {
 }
 
 async function sendToUser(userId, payload) {
-  const { getEnvironmentConfig } = require('../config/environments');
+  const { getEnvironmentConfig } = require('../../config/environments');
   const envConfig = getEnvironmentConfig();
   
   console.log(`🔍 [NotificationService] Looking up token for user: ${userId}`);
