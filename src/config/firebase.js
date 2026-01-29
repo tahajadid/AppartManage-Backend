@@ -46,14 +46,28 @@ const initFirebaseApp = () => {
   const envConfig = getEnvironmentConfig();
   const serviceAccount = loadServiceAccount();
 
-  console.log(`🔥 Initializing Firebase Admin SDK for: ${envConfig.firebase.projectId}`);
+  const serviceAccountProjectId = serviceAccount.project_id;
+  const configProjectId = envConfig.firebase.projectId;
+
+  console.log(`🔥 Initializing Firebase Admin SDK:`);
+  console.log(`   Environment: ${envConfig.name.toUpperCase()}`);
+  console.log(`   Config Project ID: ${configProjectId}`);
+  console.log(`   Service Account Project ID: ${serviceAccountProjectId}`);
+  
+  if (serviceAccountProjectId !== configProjectId) {
+    console.warn(`⚠️  WARNING: Project ID mismatch!`);
+    console.warn(`   Config expects: ${configProjectId}`);
+    console.warn(`   Service account is for: ${serviceAccountProjectId}`);
+    console.warn(`   This may cause "SenderId mismatch" errors if mobile app uses different project!`);
+  }
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
 
   appInitialized = true;
-  console.log(`✅ Firebase Admin SDK initialized successfully\n`);
+  console.log(`✅ Firebase Admin SDK initialized successfully`);
+  console.log(`   Using project: ${serviceAccountProjectId}\n`);
   return admin.app();
 };
 

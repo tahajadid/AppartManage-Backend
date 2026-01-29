@@ -5,8 +5,13 @@ const { PORT, allowedOrigins } = require('./config/env');
 const deviceRoutes = require('./routes/deviceRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const billRoutes = require('./routes/billRoutes');
+const requestLogger = require('./middleware/requestLogger');
 
 const app = express();
+
+// Request logging middleware (must be before routes)
+app.use(requestLogger);
+
 app.use(express.json());
 app.use(
   cors(
@@ -54,9 +59,20 @@ app.use((err, _req, res, _next) => {
 });
 
 const { environment } = require('./config/env');
+const { getEnvironmentConfig } = require('../config/environments');
+
+// Initialize Firebase to show project info on startup
+try {
+  require('./config/firebase').getFirestore();
+} catch (error) {
+  console.error('❌ Failed to initialize Firebase:', error.message);
+}
 
 app.listen(PORT, () => {
+  const envConfig = getEnvironmentConfig();
   console.log(`🚀 Notification backend running on port ${PORT}`);
-  console.log(`   Environment: ${environment.toUpperCase()}\n`);
+  console.log(`   Environment: ${environment.toUpperCase()}`);
+  console.log(`   Firebase Project ID: ${envConfig.firebase.projectId}`);
+  console.log(`   Backend URL: https://appartmanage-backend.onrender.com\n`);
 });
 
