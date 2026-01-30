@@ -13,29 +13,36 @@ const loadServiceAccount = () => {
   const envPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
   const configPath = envConfig.firebase.serviceAccountPath;
 
+  let serviceAccount;
+  
   if (json) {
     console.log('📦 Loading Firebase service account from FIREBASE_SERVICE_ACCOUNT_JSON');
-    return JSON.parse(json);
+    serviceAccount = JSON.parse(json);
+  } else {
+    // Try environment variable path first, then config path
+    const serviceAccountPath = envPath || configPath;
+    const fullPath = path.isAbsolute(serviceAccountPath) 
+      ? serviceAccountPath 
+      : path.join(__dirname, '../../', serviceAccountPath);
+
+    if (fs.existsSync(fullPath)) {
+      console.log(`📦 Loading Firebase service account from: ${serviceAccountPath}`);
+      const fileContents = fs.readFileSync(fullPath, 'utf8');
+      serviceAccount = JSON.parse(fileContents);
+    } else {
+      throw new Error(
+        `Missing Firebase service account for environment: ${envConfig.name}. ` +
+        `Expected file: ${serviceAccountPath} ` +
+        `(resolved to: ${fullPath}). ` +
+        `Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH.`
+      );
+    }
   }
-
-  // Try environment variable path first, then config path
-  const serviceAccountPath = envPath || configPath;
-  const fullPath = path.isAbsolute(serviceAccountPath) 
-    ? serviceAccountPath 
-    : path.join(__dirname, '../../', serviceAccountPath);
-
-  if (fs.existsSync(fullPath)) {
-    console.log(`📦 Loading Firebase service account from: ${serviceAccountPath}`);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    return JSON.parse(fileContents);
-  }
-
-  throw new Error(
-    `Missing Firebase service account for environment: ${envConfig.name}. ` +
-    `Expected file: ${serviceAccountPath} ` +
-    `(resolved to: ${fullPath}). ` +
-    `Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH.`
-  );
+  
+  // Export loadServiceAccount so it can be used elsewhere
+  loadServiceAccount.serviceAccount = serviceAccount;
+  
+  return serviceAccount;
 };
 
 const initFirebaseApp = () => {
@@ -85,5 +92,6 @@ module.exports = {
   admin,
   getMessaging,
   getFirestore,
+  loadServiceAccount, // Export for use in other modules
 };
 

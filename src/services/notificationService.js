@@ -60,8 +60,29 @@ async function sendToUser(userId, payload) {
   const { getEnvironmentConfig } = require('../../config/environments');
   const envConfig = getEnvironmentConfig();
   
+  // Get service account info for better error messages
+  let serviceAccount = null;
+  try {
+    const firebaseConfig = require('../config/firebase');
+    // Try to get service account if available
+    if (firebaseConfig.loadServiceAccount && firebaseConfig.loadServiceAccount.serviceAccount) {
+      serviceAccount = firebaseConfig.loadServiceAccount.serviceAccount;
+    } else {
+      // Try loading it
+      const json = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+      if (json) {
+        serviceAccount = JSON.parse(json);
+      }
+    }
+  } catch (e) {
+    // Ignore if can't load
+  }
+  
   console.log(`🔍 [NotificationService] Looking up token for user: ${userId}`);
   console.log(`   Backend Firebase Project: ${envConfig.firebase.projectId}`);
+  if (serviceAccount) {
+    console.log(`   Service Account Project: ${serviceAccount.project_id}`);
+  }
   
   const token = await getUserToken(userId);
   if (!token) {
@@ -97,16 +118,31 @@ async function sendToUser(userId, payload) {
     });
     
     if (error.code === 'messaging/mismatched-credential') {
-      console.error(`❌ [NotificationService] SENDER ID MISMATCH DETECTED!`);
+      console.error(`\n❌ [NotificationService] SENDER ID MISMATCH DETECTED!`);
       console.error(`   This means the FCM token was registered with a different Firebase project.`);
       console.error(`   Backend is using project: ${envConfig.firebase.projectId}`);
       console.error(`   The mobile app must be using the SAME Firebase project.`);
-      console.error(`   SOLUTION:`);
+      console.error(`\n   SOLUTION:`);
       console.error(`   1. Check your frontend .env.production file:`);
-      console.error(`      EXPO_PUBLIC_FIREBASE_PROD_PROJECT_ID should match: ${envConfig.firebase.projectId}`);
-      console.error(`   2. Check your Render environment variables:`);
+      console.error(`      EXPO_PUBLIC_FIREBASE_PROD_PROJECT_ID should be: ${envConfig.firebase.projectId}`);
+      console.error(`      EXPO_PUBLIC_FIREBASE_PROD_MESSAGING_SENDER_ID should match the backend's sender ID`);
+      console.error(`   2. Verify your Render backend environment variables:`);
       console.error(`      FIREBASE_PROJECT_ID should be: ${envConfig.firebase.projectId}`);
-      console.error(`   3. Make sure the FIREBASE_SERVICE_ACCOUNT_JSON in Render is from the SAME Firebase project`);
+      if (serviceAccount) {
+        console.error(`      FIREBASE_SERVICE_ACCOUNT_JSON.project_id is: ${serviceAccount.project_id}`);
+      }
+      console.error(`   3. Rebuild your production app:`);
+      console.error(`      npm run android:prod`);
+      console.error(`      OR npm run ios:prod`);
+      console.error(`   4. IMPORTANT: Users must re-register their tokens:`);
+      console.error(`      - Uninstall the old app`);
+      console.error(`      - Install the new build`);
+      console.error(`      - Log in again (this will register token with correct project)`);
+      console.error(`\n   Current Backend Configuration:`);
+      console.error(`      Project ID: ${envConfig.firebase.projectId}`);
+      if (serviceAccount) {
+        console.error(`      Service Account Project: ${serviceAccount.project_id}`);
+      }
     }
     
     if (

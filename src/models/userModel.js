@@ -9,16 +9,42 @@ async function saveUserToken(userId, token, platform) {
     platform: platform || 'unknown',
   });
   
+  // Check if user document exists and get existing data to preserve all fields
+  const userDoc = await userRef(userId).get();
+  const userExists = userDoc.exists;
+  const existingData = userExists ? userDoc.data() : {};
+  
+  if (!userExists) {
+    console.log(`⚠️ [UserModel] User document does not exist, creating it for: ${userId}`);
+  } else {
+    console.log(`📋 [UserModel] Preserving existing user fields:`, Object.keys(existingData).filter(k => !['fcmToken', 'fcmTokenUpdatedAt', 'platform'].includes(k)));
+  }
+  
+  // Use set with merge: true to preserve all existing fields and update token-related fields
   await userRef(userId).set(
     {
+      uid: String(userId),
       fcmToken: String(token),
       fcmTokenUpdatedAt: new Date().toISOString(),
       platform: platform || 'unknown',
+      // Preserve all other existing fields (role, apartmentId, email, name, etc.)
+      ...(existingData.role ? { role: existingData.role } : {}),
+      ...(existingData.apartmentId ? { apartmentId: existingData.apartmentId } : {}),
+      ...(existingData.email ? { email: existingData.email } : {}),
+      ...(existingData.name ? { name: existingData.name } : {}),
+      ...(existingData.fullName ? { fullName: existingData.fullName } : {}),
+      ...(existingData.phoneNumber ? { phoneNumber: existingData.phoneNumber } : {}),
+      ...(existingData.monthlyFee !== undefined ? { monthlyFee: existingData.monthlyFee } : {}),
+      ...(existingData.onboardingCompleted !== undefined ? { onboardingCompleted: existingData.onboardingCompleted } : {}),
+      ...(userExists ? {} : {
+        createdAt: existingData.createdAt || new Date().toISOString(),
+      }),
+      updatedAt: new Date().toISOString(),
     },
     { merge: true }
   );
   
-  console.log(`✅ [UserModel] Token saved successfully for user: ${userId}`);
+  console.log(`✅ [UserModel] Token saved successfully for user: ${userId}${!userExists ? ' (document created)' : ' (document updated)'}`);
 }
 
 async function getUserToken(userId) {
