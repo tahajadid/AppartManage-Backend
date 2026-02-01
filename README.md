@@ -35,5 +35,4 @@ npm start
 ## Notes
 - Token storage is in-memory; replace `src/tokenStore.js` with a database for production.
 - Client must POST tokens to `/api/devices` after login and on app start when the token changes.
-- Data payloads are stringified if not strings, so you can send objects safely.
 
